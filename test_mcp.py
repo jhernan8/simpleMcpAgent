@@ -1,6 +1,6 @@
 """
-Interactive test script for BJC MCP Server via Azure APIM.
-Requires VPN access to test-apim.bjc.org.
+
+
 
 Prerequisites:
     az login
@@ -10,7 +10,7 @@ Prerequisites:
         $env:FOUNDRY_MODEL = "gpt-4o"
 
 Usage:
-    python test_bjc_mcp.py
+    python test_mcp.py
 """
 
 import asyncio
@@ -23,9 +23,9 @@ from agent_framework import Agent, MCPStreamableHTTPTool
 from agent_framework.foundry import FoundryChatClient
 from azure.identity.aio import DefaultAzureCredential
 
-BJC_MCP_URL = "https://learn.microsoft.com/api/mcp"
-BJC_APIM_KEY = ""
-FOUNDRY_PROJECT_ENDPOINT = "https://ai-account-73ieznn6rq6y6.services.ai.azure.com/api/projects/ai-project-patientContextAgentEnv"
+MCP_URL = "https://learn.microsoft.com/api/mcp"
+APIM_KEY = ""
+FOUNDRY_PROJECT_ENDPOINT = ""
 FOUNDRY_MODEL = "gpt-4o"
 
 
@@ -33,14 +33,14 @@ def check_connectivity():
     """Quick HTTP check to verify the MCP endpoint is reachable through APIM."""
     print("=" * 60)
     print("Step 1: Checking MCP server connectivity...")
-    print(f"  URL: {BJC_MCP_URL}")
+    print(f"  URL: {MCP_URL}")
     print("=" * 60)
 
     try:
         resp = requests.post(
-            BJC_MCP_URL,
+            MCP_URL,
             headers={
-                "Ocp-Apim-Subscription-Key": BJC_APIM_KEY,
+                "Ocp-Apim-Subscription-Key": APIM_KEY,
                 "Content-Type": "application/json",
             },
             json={
@@ -80,7 +80,7 @@ def check_connectivity():
 
 
 async def interactive_chat():
-    """Interactive chat loop with the BJC MCP agent."""
+    """Interactive chat loop with the  MCP agent."""
 
     if not FOUNDRY_PROJECT_ENDPOINT:
         print("\nError: FOUNDRY_PROJECT_ENDPOINT environment variable is required.")
@@ -88,7 +88,7 @@ async def interactive_chat():
         sys.exit(1)
 
     print("\n" + "=" * 60)
-    print("Step 2: Starting interactive agent with BJC MCP tools...")
+    print("Step 2: Starting interactive agent with  MCP tools...")
     print('  Type "quit" or "exit" to stop.')
     print("=" * 60)
 
@@ -101,17 +101,17 @@ async def interactive_chat():
             )
             async with Agent(
                 client=client,
-                name="BJC-Test-Agent",
+                name="MCP-Test-Agent",
                 instructions=(
-                    "You are a helpful assistant with access to BJC tools via MCP. "
+                    "You are a helpful assistant with access to MCP tools. "
                     "Use the available tools to answer the user's questions. "
                     "Be concise and helpful."
                 ),
                 tools=MCPStreamableHTTPTool(
-                    name="bjc-tools",
-                    url=BJC_MCP_URL,
+                    name="mcp-tools",
+                    url=MCP_URL,
                     header_provider=lambda kwargs: {
-                        "Ocp-Apim-Subscription-Key": BJC_APIM_KEY
+                        "Ocp-Apim-Subscription-Key": APIM_KEY
                     },
                 ),
             ) as agent:
